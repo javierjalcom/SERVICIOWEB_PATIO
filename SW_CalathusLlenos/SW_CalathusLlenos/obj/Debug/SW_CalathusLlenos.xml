@@ -1,0 +1,14 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+SW_CalathusLlenos
+</name>
+</assembly>
+<members>
+<member name="M:SW_CalathusLlenos.Servicio_Llenos.Actualizar_ClaseInventario(System.String,System.String,System.Int32,System.Int32)">
+ '''''''''''''
+
+</member>
+</members>
+</doc>

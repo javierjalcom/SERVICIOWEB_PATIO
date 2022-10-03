@@ -1,0 +1,9 @@
+D:\JCADENA\JALCOM\CODE\NARROW BAND\LLENOS\SERVICIO LLENOS\SW_CalathusLlenos\SW_CalathusLlenos\obj\Release\ResolveAssemblyReference.cache
+D:\JCADENA\JALCOM\CODE\NARROW BAND\LLENOS\SERVICIO LLENOS\SW_CalathusLlenos\SW_CalathusLlenos\obj\Release\SW_CalathusLlenos.Resources.resources
+D:\JCADENA\JALCOM\CODE\NARROW BAND\LLENOS\SERVICIO LLENOS\SW_CalathusLlenos\SW_CalathusLlenos\obj\Release\SW_CalathusLlenos.vbproj.GenerateResource.Cache
+D:\JCADENA\JALCOM\CODE\NARROW BAND\LLENOS\SERVICIO LLENOS\SW_CalathusLlenos\SW_CalathusLlenos\bin\SW_CalathusLlenos.dll
+D:\JCADENA\JALCOM\CODE\NARROW BAND\LLENOS\SERVICIO LLENOS\SW_CalathusLlenos\SW_CalathusLlenos\bin\SW_CalathusLlenos.pdb
+D:\JCADENA\JALCOM\CODE\NARROW BAND\LLENOS\SERVICIO LLENOS\SW_CalathusLlenos\SW_CalathusLlenos\bin\SW_CalathusLlenos.xml
+D:\JCADENA\JALCOM\CODE\NARROW BAND\LLENOS\SERVICIO LLENOS\SW_CalathusLlenos\SW_CalathusLlenos\obj\Release\SW_CalathusLlenos.dll
+D:\JCADENA\JALCOM\CODE\NARROW BAND\LLENOS\SERVICIO LLENOS\SW_CalathusLlenos\SW_CalathusLlenos\obj\Release\SW_CalathusLlenos.xml
+D:\JCADENA\JALCOM\CODE\NARROW BAND\LLENOS\SERVICIO LLENOS\SW_CalathusLlenos\SW_CalathusLlenos\obj\Release\SW_CalathusLlenos.pdb

@@ -1,0 +1,37 @@
+<publishData>
+  <publishTarget publishUrl="D:\JCADENA\JALCOM\CODE\NARROW BAND\LLENOS\SERVICIO LLENOS\pub\diciembre 2021\">
+    <file relUrl="bin/SW_CalathusLlenos.pdb" publishTime="12/17/2021 13:27:53" />
+    <file relUrl="bin/SW_CalathusLlenos.dll" publishTime="12/17/2021 13:27:53" />
+    <file relUrl="Web.config" publishTime="12/17/2021 13:13:19" />
+    <file relUrl="bin/SW_CalathusLlenos.xml" publishTime="12/17/2021 13:27:53" />
+    <file relUrl="Servicio_Llenos.asmx" publishTime="09/17/2019 19:26:25" />
+  </publishTarget>
+  <publishTarget publishUrl="D:\temp\llenospub\30-09-2019-1\">
+    <file relUrl="bin/SW_CalathusLlenos.pdb" publishTime="10/01/2019 11:55:43" />
+    <file relUrl="bin/SW_CalathusLlenos.dll" publishTime="10/01/2019 11:55:43" />
+    <file relUrl="bin/SW_CalathusLlenos.xml" publishTime="10/01/2019 11:55:43" />
+    <file relUrl="Servicio_Llenos.asmx" publishTime="09/17/2019 19:26:25" />
+    <file relUrl="Web.config" publishTime="10/01/2019 11:54:32" />
+  </publishTarget>
+  <publishTarget publishUrl="D:\temp\llenospub\27-09-2019-2\">
+    <file relUrl="bin/SW_CalathusLlenos.pdb" publishTime="09/27/2019 13:37:57" />
+    <file relUrl="bin/SW_CalathusLlenos.dll" publishTime="09/27/2019 13:37:57" />
+    <file relUrl="bin/SW_CalathusLlenos.xml" publishTime="09/27/2019 13:37:57" />
+    <file relUrl="Web.config" publishTime="09/27/2019 12:52:20" />
+    <file relUrl="Servicio_Llenos.asmx" publishTime="09/17/2019 19:26:25" />
+  </publishTarget>
+  <publishTarget publishUrl="D:\temp\llenospub\26-09-2019-1\">
+    <file relUrl="bin/SW_CalathusLlenos.pdb" publishTime="09/26/2019 12:01:31" />
+    <file relUrl="bin/SW_CalathusLlenos.dll" publishTime="09/26/2019 12:01:31" />
+    <file relUrl="bin/SW_CalathusLlenos.xml" publishTime="09/26/2019 12:01:31" />
+    <file relUrl="Servicio_Llenos.asmx" publishTime="09/17/2019 19:26:25" />
+    <file relUrl="Web.config" publishTime="09/25/2019 12:10:32" />
+  </publishTarget>
+  <publishTarget publishUrl="D:\temp\llenospub\18-09-2019-1\">
+    <file relUrl="bin/SW_CalathusLlenos.pdb" publishTime="09/17/2019 19:56:01" />
+    <file relUrl="bin/SW_CalathusLlenos.dll" publishTime="09/17/2019 19:56:01" />
+    <file relUrl="bin/SW_CalathusLlenos.xml" publishTime="09/17/2019 19:56:01" />
+    <file relUrl="Web.config" publishTime="09/17/2019 19:39:23" />
+    <file relUrl="Servicio_Llenos.asmx" publishTime="09/17/2019 19:26:25" />
+  </publishTarget>
+</publishData>
