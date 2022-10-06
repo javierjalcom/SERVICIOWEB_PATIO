@@ -3688,6 +3688,7 @@ Public Function UpdateVisitStatus(ByVal alng_Visita As Long, ByVal UserName As S
 
         Dim istr_conx As String = "" ' cadena de conexion
         Dim strSQL As String = ""
+        Dim intOkStatus As Integer
 
         istr_conx = ConfigurationManager.ConnectionStrings("dbCalathus").ToString()
         ioleconx_conexion.ConnectionString = istr_conx
@@ -3718,6 +3719,7 @@ Public Function UpdateVisitStatus(ByVal alng_Visita As Long, ByVal UserName As S
         iolecmd_comand.CommandType = CommandType.StoredProcedure
         iolecmd_comand.CommandTimeout = 99999
 
+        intOkStatus = 0
         Try
             iAdapt_comand.SelectCommand = iolecmd_comand
             'iAdapt_comand.SelectCommand.CommandTimeout = of_getMaxTimeout()
@@ -3726,13 +3728,236 @@ Public Function UpdateVisitStatus(ByVal alng_Visita As Long, ByVal UserName As S
             Dim strError As String = ObtenerError(ex.Message, 99999)
             strError = strError
             strError = ex.Message
+            intOkStatus = -1
         Finally
             ioleconx_conexion.Close()
         End Try
 
+        '' si ok enviar notificaciones push
+        If intOkStatus = 0 Then
+            Dim ldtb_result2 As DataTable = New DataTable("result")
+            Dim long_visit As Long
+            Dim lstr_readservice As String
+            Dim lstr_notificaciion As String
+            Dim lstr_searchService As String
+            Dim lstr_conname As String
+
+            long_visit = 0
+            Try
+                ldtb_result2 = GetInfoVContQueue(alng_Visita, alng_UniversalId, UserName, "", "")
+                If ldtb_result2.Rows.Count > 0 And ldtb_result2.Columns.Count > 1 Then
+                    'id visita 
+                    'If Long.TryParse(ldtb_Result(0)("VISITID").ToString, long_visit) = False Then
+                    If Long.TryParse(ldtb_result2(0)("VISITID").ToString, long_visit) = False Then
+                        long_visit = 0
+                    End If
+
+                    'tipo servicio
+                    lstr_readservice = ldtb_result2(0)("SERVICE").ToString
+
+                    'contenedor 
+                    lstr_conname = ldtb_result2(0)("STRCONTNAME").ToString
+
+
+                    ''INGRESO
+                    If lstr_readservice.IndexOf("REC") > -1 Then
+                        lstr_searchService = "REC"
+                        lstr_notificaciion = "DESCARGA"
+                    End If
+
+
+                    ''INGRESO
+                    If lstr_readservice.IndexOf("ENT") > -1 Then
+                        lstr_searchService = "ENT"
+                        lstr_notificaciion = "CARGA"
+                    End If
+
+                End If
+
+                '' llamar push
+                If long_visit > 0 Then
+                    SentNotificationsForContainer(long_visit, alng_UniversalId, lstr_conname, lstr_notificaciion, "")
+                End If
+
+            Catch ex As Exception
+
+            End Try
+            'buscar informacion del contenedor 
+        End If
+
         Return 0
     End Function
     '' MARK
+    <WebMethod()> _
+ Public Function GetInfoVContQueue(ByVal alng_Visita As Long, ByVal alng_UniversalId As Long, ByVal UserName As String, ByVal astr_Position As String, ByVal astrContainer As String) As DataTable
+
+        Dim ldtb_Result = New DataTable() ' la tabla que obtiene el resultado
+        Dim iAdapt_comand As OleDbDataAdapter = New OleDbDataAdapter()
+        Dim iolecmd_comand As OleDbCommand = New OleDbCommand()
+        Dim ioleconx_conexion As OleDbConnection = New OleDbConnection() '' objeto de conexion que se usara para conectar 
+
+        Dim istr_conx As String = "" ' cadena de conexion
+        Dim strSQL As String = ""
+        Dim intOkStatus As Integer
+
+        istr_conx = ConfigurationManager.ConnectionStrings("dbCalathus").ToString()
+        ioleconx_conexion.ConnectionString = istr_conx
+        iolecmd_comand = ioleconx_conexion.CreateCommand()
+
+        ldtb_Result = New DataTable("Visitio")
+
+
+        strSQL = "spCRUDVisitContQueue"
+
+        iolecmd_comand.Parameters.Add("@intMode", OleDbType.Numeric)
+        iolecmd_comand.Parameters("@intMode").Value = 1
+
+        iolecmd_comand.Parameters.Add("@intVisitId", OleDbType.Numeric)
+        iolecmd_comand.Parameters("@intVisitId").Value = alng_Visita
+
+        iolecmd_comand.Parameters.Add("@intContainerUniversalId", OleDbType.Numeric)
+        iolecmd_comand.Parameters("@intContainerUniversalId").Value = alng_UniversalId
+
+        iolecmd_comand.Parameters.Add("@strYardPosition", OleDbType.Char)
+        iolecmd_comand.Parameters("@strYardPosition").Value = astr_Position
+
+        iolecmd_comand.Parameters.Add("@strContainer", OleDbType.Char)
+        iolecmd_comand.Parameters("@strContainer").Value = astrContainer
+
+        iolecmd_comand.Parameters.Add("@struser", OleDbType.Char)
+        iolecmd_comand.Parameters("@struser").Value = UserName
+
+
+        iolecmd_comand.CommandText = strSQL
+        iolecmd_comand.CommandType = CommandType.StoredProcedure
+        iolecmd_comand.CommandTimeout = 99999
+
+        intOkStatus = 0
+        Try
+            iAdapt_comand.SelectCommand = iolecmd_comand
+            'iAdapt_comand.SelectCommand.CommandTimeout = of_getMaxTimeout()
+            iAdapt_comand.Fill(ldtb_Result)
+        Catch ex As Exception
+            Dim strError As String = ObtenerError(ex.Message, 99999)
+            strError = strError
+            strError = ex.Message
+            intOkStatus = -1
+        Finally
+            ioleconx_conexion.Close()
+        End Try
+
+        Return ldtb_Result
+
+    End Function
+
+
+
+    <WebMethod()> _
+    Public Function SentNotificationsForContainer(ByVal alng_visit As Long, ByVal alng_UniversalId As Long, ByVal astr_containerId As String, ByVal astr_operaction As String, ByVal astr_fecha As String) As String
+        Try
+            Dim lint_notifications As Integer
+
+            lint_notifications = CType(ConfigurationManager.AppSettings.Item("SendNotifications").ToString, Integer)
+
+            'si esta habilitado enviar notificaciones
+            If lint_notifications > 0 Then
+
+                If astr_fecha.Length > 4 Then
+                    astr_fecha = astr_fecha
+                Else
+                    astr_fecha = Format(Date.Now, "yyyy-MM-dd HH:mm:ss ")
+                End If
+
+                Dim lservweb As Pushservice.WS = New Pushservice.WS()
+                Dim lstr_result As String
+                lstr_result = lservweb.NotificacionOperacionContenedor(alng_visit, alng_UniversalId, astr_containerId, astr_operaction, astr_fecha)
+
+
+            End If ' si hay notificaciones
+
+        Catch ex As Exception
+
+        End Try
+
+        Return ""
+
+    End Function
+
+    <WebMethod()> _
+   Public Function SentNotificationsForEIRCreated(ByVal alng_visit As Long, ByVal alng_UniversalId As Long, ByVal astr_containerId As String, ByVal aint_EIR As Integer, ByVal astr_Username As String) As String
+        Try
+            Dim lint_notifications As Integer
+
+            lint_notifications = CType(ConfigurationManager.AppSettings.Item("SendNotifications").ToString, Integer)
+
+            'si esta habilitado enviar notificaciones
+            If lint_notifications > 0 Then
+
+                Dim lservweb As Pushservice.WS = New Pushservice.WS()
+                Dim lstr_result As String
+
+                lstr_result = lservweb.subirEIR(alng_visit, alng_UniversalId, astr_containerId, aint_EIR, astr_Username)
+
+
+            End If ' si hay notificaciones
+
+        Catch ex As Exception
+
+        End Try
+
+        Return ""
+
+    End Function
+
+    <WebMethod()> _
+ Public Function SentNotificationsForCheckIn(ByVal alng_visit As Long, ByVal astr_DriverLicense As String, ByVal astr_Username As String) As String
+        Try
+            Dim lint_notifications As Integer
+
+            lint_notifications = CType(ConfigurationManager.AppSettings.Item("SendNotifications").ToString, Integer)
+
+            'si esta habilitado enviar notificaciones
+            If lint_notifications > 0 Then
+
+                Dim lservweb As Pushservice.WS = New Pushservice.WS()
+                Dim lstr_result As String
+
+                lstr_result = lservweb.CheckInOrden(astr_Username, alng_visit, astr_DriverLicense)
+
+            End If ' si hay notificaciones
+
+        Catch ex As Exception
+
+        End Try
+
+        Return ""
+
+    End Function
+
+    <WebMethod()> _
+ Public Function SentNotificationsForCheckOut(ByVal alng_visit As Long, ByVal astr_DriverLicense As String, ByVal astr_Username As String) As String
+        Try
+            Dim lint_notifications As Integer
+
+            lint_notifications = CType(ConfigurationManager.AppSettings.Item("SendNotifications").ToString, Integer)
+
+            'si esta habilitado enviar notificaciones
+            If lint_notifications > 0 Then
+
+                Dim lservweb As Pushservice.WS = New Pushservice.WS()
+                Dim lstr_result As String
+
+                lstr_result = lservweb.CheckOutOrden(astr_Username, alng_visit, astr_DriverLicense)
+
+            End If ' si hay notificaciones
+
+        Catch ex As Exception
+
+        End Try
+
+        Return ""
+
+    End Function
     ''''
 
     ''''''''''''''''''''''''
