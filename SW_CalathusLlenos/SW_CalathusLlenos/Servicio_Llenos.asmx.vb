@@ -752,6 +752,14 @@ Public Class Servicio_Llenos
         ' variables locales, tendran los valores de los controles
         ls_position = prmstr_PosicionPatioFin.Trim()
 
+        ''validacion para cam en carga 
+        If prmint_AtachID = 0 And prmint_ContainerUniv > 0 And prmstr_PosicionPatioFin.Trim.ToUpper = "CAM" Then
+            UpdateServiceQueue(0, prmint_ContainerUniv, prmstr_Username, prmstr_PosicionPatioFin)
+            Return ""
+        End If
+        '''
+        '''''
+
         'obtencion de la bahia ,bloque  y estiba 
 
         li_poslength = prmstr_PosicionPatioFin.Length
@@ -770,7 +778,7 @@ Public Class Servicio_Llenos
         Else
             ls_Bay = ls_position.Substring(li_poslength - 4, 2)
         End If
-        If li_poslength < 3 Then
+        If li_poslength <= 3 Then
             ls_Block = ""
         Else
             ls_Block = ls_position.Substring(0, li_poslength - 4)
@@ -782,6 +790,8 @@ Public Class Servicio_Llenos
         If prmint_AtachID = 0 Then
 
             If prmint_ContainerUniv > 0 Then
+
+
 
                 'asignacion de los argumentos al procedimiento
 
@@ -962,6 +972,13 @@ Public Class Servicio_Llenos
 
                 End Try
 
+                '' si la posicion origen es de 3 0s , mandar llamar a la actualizacion del queue
+                If prmstr_PosicionOrigen.IndexOf("000") > -1 Then
+                    UpdateServiceQueue(0, prmint_ContainerUniv, prmstr_Username, prmstr_PosicionPatioFin)
+                    Return ""
+                End If
+
+
                 Return ""
 
             Else
@@ -1024,6 +1041,15 @@ Public Class Servicio_Llenos
                 '''' si el comando tiene un universal mayor a 0 
                 ''''' 
                 If lint_universal > 0 Then
+
+
+                    '' actualizar el queue
+                    '' si es cambio de ubucacion por posicion de cam, registrar la carga
+                    If prmstr_PosicionPatioFin.Trim.ToUpper = "CAM" Then
+                        UpdateServiceQueue(0, lint_universal, prmstr_Username, prmstr_PosicionPatioFin)
+                        Continue For
+                    End If
+                    '''
 
                     oleDBcom.Parameters.Clear()
                     ''''' ejecutar el comando de posicion de el inventario
@@ -1205,6 +1231,12 @@ Public Class Servicio_Llenos
                     End Try
 
 
+                    '' si la posicion origen es de 3 0s , mandar llamar a la actualizacion del queue
+                    If prmstr_PosicionOrigen.IndexOf("000") > -1 Then
+                        UpdateServiceQueue(0, prmint_ContainerUniv, prmstr_Username, prmstr_PosicionPatioFin)
+                        Continue For
+                    End If
+                    '''''
                 Else
 
                     Return "Error de conexion"
@@ -1391,6 +1423,11 @@ Public Class Servicio_Llenos
                 oleDBcom.Connection.Close()
             End Try
             'Return ""
+
+
+            '' ejecucion del updateserviqueue
+            UpdateServiceQueue(0, prmint_ContainerUniv, prmstr_Username, ls_position)
+
 
         End If 'If prmint_ContainerUniv > 0 Then
 
@@ -2135,7 +2172,7 @@ Public Function UpdateVisitStatus(ByVal alng_Visita As Long, ByVal UserName As S
         End If 'If lengh >= 0 Then
         'End If 'If cadena.IndexOf("ENT") >= 0 Then
 
-  
+
         Return 0
     End Function
     ''''''''''''
@@ -3640,6 +3677,64 @@ Public Function UpdateVisitStatus(ByVal alng_Visita As Long, ByVal UserName As S
 
         Return 1
     End Function
+    '' MARK
+    <WebMethod()> _
+ Public Function UpdateServiceQueue(ByVal alng_Visita As Long, ByVal alng_UniversalId As Long, ByVal UserName As String, ByVal astr_Position As String) As Integer
+
+        Dim ldtb_Result = New DataTable() ' la tabla que obtiene el resultado
+        Dim iAdapt_comand As OleDbDataAdapter = New OleDbDataAdapter()
+        Dim iolecmd_comand As OleDbCommand = New OleDbCommand()
+        Dim ioleconx_conexion As OleDbConnection = New OleDbConnection() '' objeto de conexion que se usara para conectar 
+
+        Dim istr_conx As String = "" ' cadena de conexion
+        Dim strSQL As String = ""
+
+        istr_conx = ConfigurationManager.ConnectionStrings("dbCalathus").ToString()
+        ioleconx_conexion.ConnectionString = istr_conx
+        iolecmd_comand = ioleconx_conexion.CreateCommand()
+
+        ldtb_Result = New DataTable("Visitio")
+
+
+        strSQL = "spMarkProcVContainerQueue"
+
+        iolecmd_comand.Parameters.Add("@intVisitId", OleDbType.Numeric)
+        iolecmd_comand.Parameters("@intVisitId").Value = alng_Visita
+
+
+        iolecmd_comand.Parameters.Add("@intContainerUniversalId", OleDbType.Numeric)
+        iolecmd_comand.Parameters("@intContainerUniversalId").Value = alng_UniversalId
+
+        iolecmd_comand.Parameters.Add("@strYardPosition", OleDbType.Char)
+        iolecmd_comand.Parameters("@strYardPosition").Value = astr_Position
+
+
+        iolecmd_comand.Parameters.Add("@struser", OleDbType.Char)
+        iolecmd_comand.Parameters("@struser").Value = UserName
+
+
+
+        iolecmd_comand.CommandText = strSQL
+        iolecmd_comand.CommandType = CommandType.StoredProcedure
+        iolecmd_comand.CommandTimeout = 99999
+
+        Try
+            iAdapt_comand.SelectCommand = iolecmd_comand
+            'iAdapt_comand.SelectCommand.CommandTimeout = of_getMaxTimeout()
+            iAdapt_comand.Fill(ldtb_Result)
+        Catch ex As Exception
+            Dim strError As String = ObtenerError(ex.Message, 99999)
+            strError = strError
+            strError = ex.Message
+        Finally
+            ioleconx_conexion.Close()
+        End Try
+
+        Return 0
+    End Function
+    '' MARK
+    ''''
+
     ''''''''''''''''''''''''
     '''''''''''''''''''''''''
     ''''''''''''''
