@@ -6,7 +6,10 @@ SW_CalathusLlenos
 </name>
 </assembly>
 <members>
-<member name="M:SW_CalathusLlenos.Pushservice.WS.#ctor">
+<member name="M:SW_CalathusLlenos.Servicio_Llenos.Actualizar_ClaseInventario(System.String,System.String,System.Int32,System.Int32)">
+ '''''''''''''
+
+</member><member name="M:SW_CalathusLlenos.Pushservice.WS.#ctor">
 	<remarks/>
 </member><member name="E:SW_CalathusLlenos.Pushservice.WS.HelloNameCompleted">
 	<remarks/>
@@ -1230,9 +1233,6 @@ SW_CalathusLlenos
 	<remarks/>
 </member><member name="T:SW_CalathusLlenos.Pushservice.saveContainerMovementsCompletedEventArgs">
 	<remarks/>
-</member><member name="M:SW_CalathusLlenos.Servicio_Llenos.Actualizar_ClaseInventario(System.String,System.String,System.Int32,System.Int32)">
- '''''''''''''
-
 </member>
 </members>
 </doc>

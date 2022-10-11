@@ -753,7 +753,7 @@ Public Class Servicio_Llenos
         ls_position = prmstr_PosicionPatioFin.Trim()
 
         ''validacion para cam en carga 
-        If prmint_AtachID = 0 And prmint_ContainerUniv > 0 And prmstr_PosicionPatioFin.Trim.ToUpper = "CAM" Then
+        If prmint_AtachID = 0 And prmint_ContainerUniv > 0 And ((prmstr_PosicionPatioFin.Trim.ToUpper = "CAM") Or (prmstr_PosicionPatioFin.ToUpper.IndexOf("CAM") > -1)) Then
             UpdateServiceQueue(0, prmint_ContainerUniv, prmstr_Username, prmstr_PosicionPatioFin)
             Return ""
         End If
@@ -2053,6 +2053,65 @@ Public Class Servicio_Llenos
 
         ''''
         UpdateVisitStatus(alng_Visita, UserName)
+
+        ''notificacion
+        Try
+            Dim lint_notifications As Integer
+            Dim lstr_CadenaSent As String
+            Dim llng_Visit As Long
+            Dim llng_Universal As Long
+            Dim lstr_Contenedor As String
+
+            lint_notifications = CType(ConfigurationManager.AppSettings.Item("SendNotifications").ToString, Integer)
+            lstr_CadenaSent = ""
+            'si esta habilitado enviar notificaciones
+            If lint_notifications > 0 Then
+
+                ' ver si hay elementos por procesar
+                Dim ldt_table As DataTable = New DataTable("elements")
+                Dim lstr_Driverlicense As String
+                ldt_table = Datos_de_la_Visita(alng_Visita)
+                ' si tiene elementos avanza
+                If ldt_table.Rows.Count > 0 Then
+
+
+                    For Each lrow As DataRow In ldt_table.Rows
+
+                        'Obtenner el numero de contenenedor para enviar 
+                        lstr_Driverlicense = lrow("strVisitDriverLicenceNumber").ToString()
+
+
+                        If cadena.IndexOf("REC") > -1 Then
+                            lstr_CadenaSent = "CHECKIN"
+                        Else
+                            lstr_Contenedor = "CHECKOUT"
+                        End If
+
+                        ' lservweb.
+                        'SentNotificationsForContainer(Visita, llng_Universal, lstr_Contenedor, lstr_CadenaSent, of_ConvertDateToStringGeneralFormat(Date.Now))
+
+                        'si es rec es checkin
+                        If cadena.IndexOf("REC") > -1 Then
+                            SentNotificationsForCheckIn(alng_Visita, lstr_Driverlicense, UserName)
+                        End If
+
+                        'si es ent, es checkout
+                        If cadena.IndexOf("ENT") > -1 Then
+                            SentNotificationsForCheckOut(alng_Visita, lstr_Driverlicense, UserName)
+                        End If
+
+                    Next ' recorrido de listado 
+
+                End If ' si hay elemen tos por avisar
+
+            End If ' si hay notificaciones
+
+        Catch ex As Exception
+
+        End Try
+
+
+        '''''''''''''''
 
         Return 0
     End Function
@@ -3957,6 +4016,49 @@ Public Function UpdateVisitStatus(ByVal alng_Visita As Long, ByVal UserName As S
 
         Return ""
 
+    End Function
+
+    '***************************VENTANA DE Cheak_In *****************
+    <WebMethod()> _
+      Public Function Datos_de_la_Visita(ByVal Visita As Integer) As Data.DataTable
+        Dim idt_result As DataTable = New DataTable ' Tabla con el query de resultados 
+        Dim iAdapt_comand As OleDbDataAdapter = New OleDbDataAdapter() '' Adaptador que ejecuta la tabla y el comando
+        Dim iolecmd_comand As OleDbCommand '' objeto comando que se ejecutara
+        Dim ioleconx_conexion As OleDbConnection = New OleDbConnection() '' objeto de conexion que se usara para conectar 
+        Dim istr_conx As String '' cadena de conexion
+        'Dim strcontainerid As String = "IPXU3283286"
+        istr_conx = ConfigurationManager.ConnectionStrings("dbCalathus").ConnectionString
+        ioleconx_conexion.ConnectionString = istr_conx
+        iolecmd_comand = ioleconx_conexion.CreateCommand()
+        idt_result.TableName = "TrearDatos"
+        Dim strSQL As String
+        Try
+            strSQL = "SELECT intVisitId,   " & _
+                "strVisitDriver,   " & _
+                "strVisitPlate, " & _
+                "strCarrierLineName, " & _
+                "strVisitDriverLicenceNumber, " & _
+                "dtmVisitDatetimeIn, " & _
+                "dtmVisitDatetimeOut " & _
+                "FROM tblclsVisit, tblclsCarrierLine  " & _
+                "WHERE ( tblclsVisit.intCarrierLineId = tblclsCarrierLine.intCarrierLineId ) and " & _
+                "( tblclsVisit.intVisitId = " & Convert.ToString(Visita) & ") "
+            iolecmd_comand.CommandText = strSQL
+
+            iAdapt_comand.SelectCommand = iolecmd_comand
+            iAdapt_comand.Fill(idt_result)
+        Catch ex As Exception
+            Dim strError As String
+            strError = ObtenerError(ex.Message, 99999)
+        Finally
+            ioleconx_conexion.Close()
+            iolecmd_comand.Connection.Close()
+            iolecmd_comand.Connection.Dispose()
+            ioleconx_conexion.Dispose()
+        End Try
+        iolecmd_comand = Nothing
+        ioleconx_conexion = Nothing
+        Return idt_result
     End Function
     ''''
 

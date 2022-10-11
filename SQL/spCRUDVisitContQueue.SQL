@@ -76,4 +76,13 @@
 		               ------@intMode ----
 	  END -- fin del modo 1 
        
-    
+       --- si el modo es 1 , consultar la informacion 
+       --IF @intMode =2
+        -- BEGIN
+        -- END
+         
+      -- si el modo es 1 , consultar la informacion 
+      -- IF @intMode =3
+      --  BEGIN
+      --  END
+           
