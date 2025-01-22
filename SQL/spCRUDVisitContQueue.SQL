@@ -65,7 +65,7 @@
 		             , @intVisitId AS 'VISITID'
 		             , @strContName as 'STRCONTNAME'
 		            RETURN 0
-		              
+		               
 		        -- obtener el id de la servicequeue
 		       -- SELECT @ServQueuId =MAX(tblclsServiceQueu.intServiceQueuId)
 		       -- FROM tblclsServiceQueu
